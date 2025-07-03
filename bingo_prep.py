@@ -11,11 +11,12 @@ import statistics
 import os
 from tkinter import filedialog
 from difflib import SequenceMatcher
+from bingo_itembanks import *
 
 #Settings (e.g. difficulty, time to bingo)
 ROWS = 5
 COLUMNS = 5
-CARDS_NUMBER = 60
+CARDS_NUMBER = 120
 NUMBER_OF_ITEMS_TO_CROP_ITEM_BANK_TO = 0            # 0 to not crop
 isMiddleFree = True
 TOTAL_NUMBER_OF_FREE_SPACES = 0
@@ -25,24 +26,9 @@ ANALYSIS_BINGO_MODE = "line bingo"                  # "line bingo" or "full card
 #Forced items (if fewer than NUMBER_OF_ITEMS_TO_CROP_ITEM_BANK_TO, otherwise prioritised)
 forced = []
 
-hce_culture = ["cast", "stage", "stunned", "part", "obsessed with", "appalling", "audience", "director", "detachment", "vivid", "to reveal", "theme", "trait", "undeniable", "to compose", "gifts", "performer", "to release", "entertainment", "stage", "to rehearse", "cultivated", "sculptor", "vernacular", "box-office", "to turn up", "to quote", "suspense", "slang", "ordinary", "to commemorate", "sculpture", "property", "heritage", "to conserve", "exhibition", "to restore", "artefact", "busker", "acoustics", "impact", "artificial", "phenomenon", "lyric", "genuine", "lingua franca", "inestimable", "notion", "to absorb", "neologism", "resourceful", "cutback", "to evoke", "overwhelming", "cuneiform characters", "mature", "hoard", "tapestry", "decay", "art gallery", "acquisition", "unexhibited", "to excavate", "preposterous",]
-hce_politics = ["scheme", "stable", "to nominate", "rumour", "to covet", "homage", "executive", "constitution", "poll", "to dispatch", "outcome", "ballot", "revenue(s)", "implacable", "to succeed", "polls", "to be opposed to", "exile", "to outline", "to support", "councillor", "to comprise", "item", "irrevocable", "alliance", "Commons", "reciprocal", "resistance", "delegate", "administration", "to represent", "placard", "policy", "grievance", "dedicated", "justice", "progress", "to decree", "General Assembly", "quota", "concept", "civil service", "benefit", "to antagonize", "to resign", "survey", "authority", "framework", "candour", "to safeguard", "MP", "campaign", "constituency", "surfeit", "Speaker", "issue", "to associate with", "to implement", "inconsistent with", "priority", "pursuit", "community", "obedience", "to abuse", "to cope with", "autocratic", "era", "empire", "peripheral", "foundation", "to reverse", "crusade", "repellent", "judicious", "to transmute", "innate", "perfidy", "contention", "domestic", "conspiracy", "remarkable", "prominence", "liberal", "equality", "degree", "to constrain", "degrading", "to enforce", "inequity", "resource", "flexible", "fusion", "to refrain", "to interfere in", "to eliminate", "distinctive", "deterrent", "admonition", "peer", "to participate in", "strangulation", "potency", "ambition", "unquestioning", "riot", "prejudice", "alien", "inherent", "disorder", "salutary", "to be concerned with", "election", "depression", "politics", "to precede", "assumption", "significant", "to insist on", "to relegate", "to substitute",]
-hce_socialproblems = []
-hce_lawandorder = []
-ha4_oc_unit1 = ["ability", "to enable", "crucial", "goddess", "to insult", "tantrum", "icing", "disease", "grumpy", "intention", "warrior", "to explore", "agreement", "compassion", "temporary", "to be done with", "genuine", "to achieve", "lasting", "to demand", "sensible", "physically", "to regret", "domestic", "disability", "recognisable", "current", "to launch", "to offer", "waste", "to implore", "to assign", "freshman", "to empower", "courage", "diversity", "requirement", "inequality", "to fix", "reduction", "shipment", "globe", "furious", "to heal", "to step up",]
-ha4_oc_unit1_bank2 = ["modest", "requirement", "to launch", "to violate", "protection", "modesty", "vast", "sibling", "to heal", "mentally", "to mistreat", "to demand", "to approach", "dedication", "source", "to occur", "refugee","gender inequality", "recognisable", "reduction", "shipment", "opportunity", "sensitive", "vulnerable", "sensible", "crucial", "genuine", "temporary", "to appreciate", "predictable", "to adapt", "blunt", "to mention",]
-vw4_oc_unit1 = ["to amass", "to be due", "to collaborate", "to fuse", "offer", "modest", "border", "to fund", "courage", "entrepreneur", "inequality", "demand", "fluctuations", "imbalance", "onset", "pedagogical", "moody", "resistance", "to diminish", "to dismiss", "repercussion", "anxiety", "to inherit", "to have in common", "to recognise", "to have a say", "adversity", "credibility", "distinguish", "elaborate", "perceive", "resilience", "valid", "thriving", "recovery", "emphasis", "lucrative", "to whine", "beneficial", "extinction", "to resent", "tedious", "to participate in", "vulnerable", "to spread", "oxygen",]
-vw4_oc_unit5_lessons1through4 = ["domestic", "remote", "reliability", "remarkable", "voyage", "estimate", "to depart", "ancestor", "shallow", "breed", "to convert", "to consume", "common", "malnutrition", "to interact", "opposite", "to emit", "contamination", "sufficient", "benefit", "disgusting", "fortunate", "gathering", "impressive", "to negotiate", "to locate", "imagination", "to expose", "ginger", "to polish", "accessible", "to separate", "observation", "diversity", "to flee from", "predictable", 
-"barrier", "to roam", "to capture", "to frown", "society", "astonishing", "apparent", "landfill", ]
-jochems_alpenbingo_setA = ["Blinding Lights", "The Weeknd", "Shape of You", "Ed Sheeran", "Dance Monkey", "Tones and I", "Drivers License", "Olivia Rodrigo", "Levitating", "Dua Lipa", "Good 4 U", "Olivia Rodrigo", "Stay", "The Kid LAROI & Justin Bieber", "Montero (Call Me By Your Name)", "Lil Nas X", "Peaches", "Justin Bieber ft. Daniel Caesar & Giveon", "Save Your Tears", "The Weeknd", "Bad Guy", "Billie Eilish", "Old Town Road", "Lil Nas X ft. Billy Ray Cyrus", "Watermelon Sugar", "Harry Styles", "Rockstar", "DaBaby ft. Roddy Ricch", "Circles", "Post Malone", "Don't Start Now", "Dua Lipa", "Sunflower", "Post Malone & Swae Lee", "Senorita", "Shawn Mendes & Camila Cabello", "Someone You Loved", "Lewis Capaldi", "Memories", "Maroon 5", "Savage Love", "Jawsh 685 & Jason Derulo", "Mood", "24kGoldn ft. Iann Dior", "Butter", "BTS", "Shallow", "Lady Gaga & Bradley Cooper", "Happier", "Marshmello & Bastille", "Thank U, Next", "Ariana Grande", "Sicko Mode", "Travis Scott", "Lucid Dreams", "Juice WRLD", "Without Me", "Halsey", "God's Plan", "Drake", "Perfect", "Ed Sheeran", "Havana", "Camila Cabello ft. Young Thug", "7 Rings", "Ariana Grande", "Rockstar", "Post Malone ft. 21 Savage", "No Tears Left to Cry", "Ariana Grande", "I Like It", "Cardi B, Bad Bunny & J Balvin", "Girls Like You", "Maroon 5 ft. Cardi B", "In My Feelings", "Drake", "Taki Taki", "DJ Snake ft. Selena Gomez, Ozuna & Cardi B", "Finesse (Remix)", "Bruno Mars ft. Cardi B", "One Kiss", "Calvin Harris & Dua Lipa", "Better Now", "Post Malone", "Eastside", "Benny Blanco, Halsey & Khalid", "High Hopes", "Panic! At The Disco", "Youngblood", "5 Seconds of Summer", "Sweet But Psycho", "Ava Max", "Truth Hurts", "Lizzo", "Bad Habits", "Ed Sheeran", "Industry Baby", "Lil Nas X & Jack Harlow", "Heat Waves", "Glass Animals", ]
-jochems_alpenbingo_setB = ["Tik Tok", "Kesha", "Imma Be", "The Black Eyed Peas", "Break Your Heart", "Taio Cruz featuring Ludacris", "Rude Boy", "Rihanna", "Nothin' on You", "B.o.B featuring Bruno Mars", "OMG", "Usher featuring will.i.am", "Not Afraid", "Eminem", "California Gurls", "Katy Perry featuring Snoop Dogg", "Love the Way You Lie", "Eminem featuring Rihanna", "Teenage Dream", "Katy Perry", "Just the Way You Are", "Bruno Mars", "Like a G6", "Far East Movement featuring The Cataracs and Dev", "We R Who We R", "Kesha", "What's My Name?", "Rihanna featuring Drake", "Only Girl (In the World)", "Rihanna", "Raise Your Glass", "Pink", "Firework", "Katy Perry", "Grenade", "Bruno Mars", "Hold It Against Me", "Britney Spears", "Black and Yellow", "Wiz Khalifa", "Born This Way", "Lady Gaga", "E.T.", "Katy Perry featuring Kanye West", "Rolling in the Deep ", "Adele", "Give Me Everything", "Pitbull featuring Ne-Yo, Afrojack and Nayer", "Party Rock Anthem", "LMFAO featuring Lauren Bennett and GoonRock", "Last Friday Night (T.G.I.F.)", "Katy Perry", "Moves Like Jagger", "Maroon 5 featuring Christina Aguilera", "Someone Like You", "Adele", "We Found Love", "Rihanna featuring Calvin Harris", "Sexy and I Know It", "LMFAO", "Set Fire to the Rain", "Adele", "Stronger (What Doesn't Kill You)", "Kelly Clarkson", "Part of Me", "Katy Perry", "We Are Young", "Fun featuring Janelle Monáe", "Somebody That I Used to Know ", "Gotye featuring Kimbra", "Call Me Maybe", "Carly Rae Jepsen", "Whistle", "Flo Rida", "We Are Never Ever Getting Back Together", "Taylor Swift", "One More Night", "Maroon 5", "Diamonds", "Rihanna", "Locked Out of Heaven", "Bruno Mars", "Thrift Shop ", "Macklemore & Ryan Lewis featuring Wanz", "Harlem Shake", "Baauer", "When I Was Your Man", "Bruno Mars", "Just Give Me a Reason", "Pink featuring Nate Ruess", "Can't Hold Us", "Macklemore & Ryan Lewis featuring Ray Dalton", "Blurred Lines", "Robin Thicke featuring T.I. and Pharrell", "Roar", "Katy Perry", "Wrecking Ball", "Miley Cyrus", "Royals", "Lorde", "The Monster", "Eminem featuring Rihanna", "Timber", "Pitbull featuring Kesha", "Dark Horse", "Katy Perry featuring Juicy J", "Happy ", "Pharrell Williams", "All of Me", "John Legend", "Fancy", "Iggy Azalea featuring Charli XCX", "Rude", "Magic!", "Shake It Off", "Taylor Swift", "All About That Bass", "Meghan Trainor", "Blank Space", "Taylor Swift", "Uptown Funk", "Mark Ronson featuring Bruno Mars", ]
-jochems_alpenbingo_setC = ["See You Again","Wiz Khalifa featuring Charlie Puth","Bad Blood","Taylor Swift featuring Kendrick Lamar","Cheerleader","Omi","Can't Feel My Face","The Weeknd","What Do You Mean?","Justin Bieber","The Hills","The Weeknd","Hello","Adele","Sorry","Justin Bieber","Love Yourself ","Justin Bieber","Pillowtalk","Zayn","Work","Rihanna featuring Drake","Panda","Desiigner","One Dance","Drake featuring WizKid and Kyla","Can't Stop the Feeling!","Justin Timberlake","Cheap Thrills","Sia featuring Sean Paul","Closer","The Chainsmokers featuring Halsey","Black Beatles","Rae Sremmurd featuring Gucci Mane","Starboy","The Weeknd featuring Daft Punk","Bad and Boujee","Migos featuring Lil Uzi Vert","Shape of You ","Ed Sheeran","Humble","Kendrick Lamar","That's What I Like","Bruno Mars","I'm the One","DJ Khaled featuring Justin Bieber, Quavo, Chance the Rapper and Lil Wayne","Despacito","Luis Fonsi and Daddy Yankee featuring Justin Bieber","Look What You Made Me Do","Taylor Swift","Bodak Yellow","Cardi B","Rockstar","Post Malone featuring 21 Savage","Perfect","Ed Sheeran solo or duet with Beyoncé","Havana","Camila Cabello featuring Young Thug","Nice for What","Drake","This Is America","Childish Gambino","Psycho","Post Malone featuring Ty Dolla Sign","Sad!","XXXTentacion","I Like It","Cardi B, Bad Bunny and J Balvin","Girls Like You","Maroon 5 featuring Cardi B","Sunflower","Post Malone and Swae Lee","Shallow","Lady Gaga and Bradley Cooper","Sucker","Jonas Brothers","Old Town Road","Lil Nas X featuring Billy Ray Cyrus","Señorita","Shawn Mendes and Camila Cabello","Highest in the Room","Travis Scott","Lose You to Love Me","Selena Gomez","Heartless","The Weeknd","All I Want for Christmas Is You","Mariah Carey",]
-
 item_bank = []
 selections_to_include_in_item_bank = [
-    ha4_oc_unit1_bank2,
-    vw4_oc_unit5_lessons1through4,
-    vw4_oc_unit1
+    thomas_ultraEZBingo250701_artistsSong
 ]
 
 #Layout
@@ -315,6 +301,7 @@ def openCalloutFile(callout_file):
     return randomised_item_bank
 
 def calcBingoStats(randomised_item_bank):    
+    print("Simulating statistics for current configuration...", end='\r')
     rounds_before_bingo_list = []
     rounds_before_bingo_list_percentage = []
     for _ in range(100):
@@ -347,6 +334,24 @@ def calcBingoStats(randomised_item_bank):
     # plt.hist(data, bins=bins)
     # plt.show()
 
+def showItemBankDlg(item_bank):
+    choice = input(f"Press ENTER to show item bank.")
+    if choice == "":
+        print(f"\nItem bank (sampled {len(item_bank_sample)} from {len(item_bank)}) contains ", end="")
+        item_bank_sample.sort()
+        for item in item_bank_sample:
+            if item == item_bank_sample[-1]:
+                print(f"and '{item}'.\n")
+            else:
+                print(f"'{item}'", end=", ")
+    
+    choice = input(f"Press ENTER to use this item bank.")
+    if choice == "":
+        item_bank = item_bank_sample
+        return True
+    else:
+        return False
+
 #Generating cards and randomised callouts
 if __name__ == "__main__":
     userConfirmsGeneratedItemBank = False
@@ -368,19 +373,11 @@ if __name__ == "__main__":
                 r_index = random.randint(0, len(item_bank_sample) - 1)
                 item_bank_sample[r_index] = item
 
+        #Show stats
+        calcBingoStats(item_bank_sample)
+
         #Show item bank
-        print(f"\nItem bank (sampled {len(item_bank_sample)} from {len(item_bank)}) contains ", end="")
-        item_bank_sample.sort()
-        for item in item_bank_sample:
-            if item == item_bank_sample[-1]:
-                print(f"and '{item}'.\n")
-            else:
-                print(f"'{item}'", end=", ")
-        
-        choice = input(f"Press ENTER to use this item bank.")
-        if choice == "":
-            item_bank = item_bank_sample
-            userConfirmsGeneratedItemBank = True
+        userConfirmsGeneratedItemBank = showItemBankDlg(item_bank_sample)
 
     output_file = ""
     while not output_file:
@@ -432,6 +429,7 @@ if __name__ == "__main__":
             row.height = int(floor((.875 * section.page_height - (2 * page_margin)) / ROWS)) #TODO: Factor currently hardcoded 
 
         bingo_card = generate_bingo_card(item_bank)
+
         # Check if bingo card exists (exact same full card almost impossible)
         while bingo_card in all_bingo_cards:
             print(f"Generated card #{1 + len(all_bingo_cards)} is duplicate of card #{all_bingo_cards.index(bingo_card)}. You got lucky! Retrying...")
@@ -486,6 +484,3 @@ if __name__ == "__main__":
             f.write(f"{item}\n")
 
     print(f"✔️ Made {CARDS_NUMBER} cards based on {len(item_bank)} items.")
-
-    #Show stats
-    calcBingoStats(randomised_item_bank)
